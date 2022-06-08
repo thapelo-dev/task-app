@@ -1,12 +1,20 @@
 version: 2.1
 orbs:
+  aws-cli: circleci/aws-cli@2.0.6
   aws-s3: circleci/aws-s3@1.0.4
 jobs:
+  aws-cli-cred-setup:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_ACCESS_SECRET
+          aws-region: AWS_REGION
   build:
     docker:
       - image: circleci/python:2.7-node
     environment:
-      AWS_REGION: us-east-1
+      AWS_REGION: AWS_REGION
     steps:
       - checkout
       - run: npm install
@@ -20,6 +28,10 @@ jobs:
           overwrite: true
 workflows:
   version: 2.1
+  aws-cli:
+    jobs:
+      - aws-cli-cred-setup:
+          context: aws
   build:
     jobs:
       - build:
